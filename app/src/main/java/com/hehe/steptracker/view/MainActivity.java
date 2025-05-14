@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         });
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
         stepTxt = findViewById(R.id.stepTxt);
-        viewModel.getName().observe(this, stepCount -> {
+        viewModel.getStepForActivity().observe(this, stepCount -> {
             stepTxt.setText(stepCount);
         });
     }
