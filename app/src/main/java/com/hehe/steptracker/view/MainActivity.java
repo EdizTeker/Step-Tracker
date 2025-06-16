@@ -1,6 +1,7 @@
 package com.hehe.steptracker.view;
 
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.TextView;
 
 import android.content.pm.PackageManager;
@@ -23,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
     private MainViewModel viewModel;
     private TextView stepTxt;
+    private Button recordBtn;
     private static final int PERMISSION_REQUEST_ACTIVITY_RECOGNITION = 100;
 
     @Override
@@ -41,14 +43,31 @@ public class MainActivity extends AppCompatActivity {
                 requestPermissions(new String[]{android.Manifest.permission.ACTIVITY_RECOGNITION}, PERMISSION_REQUEST_ACTIVITY_RECOGNITION);
             }
         }
-
-        viewModel = new ViewModelProvider(this).get(MainViewModel.class);
         stepTxt = findViewById(R.id.stepTxt);
+        recordBtn = findViewById(R.id.recordBtn);
+
         viewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(MainViewModel.class);
         viewModel.getStepForActivity().observe(this, stepCount -> {
             stepTxt.setText(stepCount);
         });
+
+        recordBtn.setOnClickListener(v -> {
+            viewModel.recordSteps();
+        });
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        viewModel.registerSensor();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        viewModel.unregisterSensor();
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
