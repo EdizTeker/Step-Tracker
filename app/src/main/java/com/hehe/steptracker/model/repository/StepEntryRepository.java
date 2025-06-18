@@ -1,8 +1,11 @@
-package com.hehe.steptracker.model;
+package com.hehe.steptracker.model.repository;
 
 import android.app.Application;
 
-import androidx.lifecycle.LiveData;
+import com.hehe.steptracker.model.database.AppDatabase;
+import com.hehe.steptracker.model.database.StepEntryDao;
+import com.hehe.steptracker.model.entity.StepEntry;
+import com.hehe.steptracker.model.preferences.SharedPreferencesManager;
 
 import java.util.Date;
 import java.util.List;
@@ -11,6 +14,7 @@ public class StepEntryRepository {
     private StepEntryDao stepEntryDao;
     private List<StepEntry> allStepEntries;
     private StepEntry currentStepEntry;
+    private SharedPreferencesManager sharedPreferencesManager;
 
     public StepEntryRepository(Application application){
         AppDatabase database = AppDatabase.getDatabase(application);
@@ -18,8 +22,9 @@ public class StepEntryRepository {
         allStepEntries = stepEntryDao.getAllStepEntry();
         Date currentTime = new Date();
         currentStepEntry = stepEntryDao.getStepEntryFromDate(currentTime);
-    }
 
+    }
+    //Room Database
     public List<StepEntry> getAllStepEntries(){
         return allStepEntries;
     }
@@ -30,6 +35,22 @@ public class StepEntryRepository {
         AppDatabase.databaseWriteExecutor.execute(() -> {
             stepEntryDao.insertStepEntry(stepEntry);
         });
+    }
+
+    //Shared Preferences
+    public Integer getStepCount() {
+        return sharedPreferencesManager.getInt("step_count", 0);
+    }
+    public void setStepCount(int step) {
+        sharedPreferencesManager.saveInt("step_count", step);
+    }
+
+    public void setIsRecording(boolean isRecording) {
+        sharedPreferencesManager.saveBoolean("is_recording", isRecording);
+    }
+
+    public boolean getIsRecording() {
+        return sharedPreferencesManager.getBoolean("welcome_shown", false);
     }
 
 }

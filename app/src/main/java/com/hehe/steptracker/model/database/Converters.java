@@ -1,4 +1,4 @@
-package com.hehe.steptracker.model;
+package com.hehe.steptracker.model.database;
 
 import androidx.room.TypeConverter;
 

@@ -1,4 +1,4 @@
-package com.hehe.steptracker.model;
+package com.hehe.steptracker.model.entity;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;

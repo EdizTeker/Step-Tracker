@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView stepTxt;
     private Button recordBtn;
     private static final int PERMISSION_REQUEST_ACTIVITY_RECOGNITION = 100;
+    private boolean isRecording = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,26 +48,25 @@ public class MainActivity extends AppCompatActivity {
         recordBtn = findViewById(R.id.recordBtn);
 
         viewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(MainViewModel.class);
-        viewModel.getStepForActivity().observe(this, stepCount -> {
-            stepTxt.setText(stepCount);
+        viewModel.getStepForActivity().observe(this, currentStepsForDisplay -> {
+            stepTxt.setText(currentStepsForDisplay);
         });
 
         recordBtn.setOnClickListener(v -> {
-            viewModel.recordSteps();
+            if(!isRecording){
+                recordBtn.setText("Finish");
+                viewModel.startRecording();
+                isRecording = true;
+            }else {
+                recordBtn.setText("Record");
+                viewModel.finishRecording();
+                isRecording = false;
+
+            }
+
         });
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        viewModel.registerSensor();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        viewModel.unregisterSensor();
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

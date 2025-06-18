@@ -1,9 +1,11 @@
-package com.hehe.steptracker.model;
+package com.hehe.steptracker.model.database;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
+
+import com.hehe.steptracker.model.entity.StepEntry;
 
 import java.util.Date;
 import java.util.List;
