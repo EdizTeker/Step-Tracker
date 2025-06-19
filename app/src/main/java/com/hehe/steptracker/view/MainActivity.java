@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView stepTxt;
     private Button recordBtn;
     private static final int PERMISSION_REQUEST_ACTIVITY_RECOGNITION = 100;
-    private boolean isRecording = false;
+    private boolean isRecording;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +52,14 @@ public class MainActivity extends AppCompatActivity {
             stepTxt.setText(currentStepsForDisplay);
         });
 
+        isRecording = viewModel.getIsRecordingForActivity();
+        if(isRecording){
+            viewModel.getStepBeforeShutdownForActivity();
+            recordBtn.setText("Finish");
+        }else {
+            recordBtn.setText("Record");
+        }
+
         recordBtn.setOnClickListener(v -> {
             if(!isRecording){
                 recordBtn.setText("Finish");
@@ -61,9 +69,8 @@ public class MainActivity extends AppCompatActivity {
                 recordBtn.setText("Record");
                 viewModel.finishRecording();
                 isRecording = false;
-
             }
-
+            viewModel.setIsRecordingForModel(isRecording);
         });
     }
 
@@ -78,5 +85,11 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        viewModel.setIsRecordingForModel(isRecording);
+       if(isRecording){viewModel.setStepBeforeShutdownForActivity(1);}
     }
 }

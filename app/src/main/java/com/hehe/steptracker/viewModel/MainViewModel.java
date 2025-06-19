@@ -22,7 +22,8 @@ public class MainViewModel extends AndroidViewModel{
     private StepEntryRepository repository;
     private int initialStepValue = 0;
     private boolean isInitialStepValueTaken = false;
-    private boolean isRecording = false;
+    private boolean isRecording;
+    private int stepBeforeShutdown;
 
 
     public MainViewModel(Application application) { //View model constructor
@@ -31,19 +32,30 @@ public class MainViewModel extends AndroidViewModel{
         stepSensorManager = new StepSensorManager(application);
         currentStepsForDisplay = new MutableLiveData<>();
         currentStepsForDisplay.setValue("");
+        isRecording = repository.getIsRecording();
+        if(isRecording){
+            isInitialStepValueTaken = false;
+            stepBeforeShutdown = repository.getStepCount();
+            startRecording();
+            Log.d("Step Counter", "stepBeforeShutdown: " + stepBeforeShutdown);
+        }else{
+            setStepBeforeShutdownForActivity(0);
+            stepBeforeShutdown = 0;
+        }
     }
 
-    public LiveData<String> getStepForActivity(){ //Sends step count to activity
-        return currentStepsForDisplay;
-    }
-
+    public LiveData<String> getStepForActivity(){return currentStepsForDisplay;}
+    public boolean getIsRecordingForActivity(){return isRecording;}
+    public void getStepBeforeShutdownForActivity(){currentSteps = stepBeforeShutdown;}
+    public void setIsRecordingForModel(boolean isRecording){repository.setIsRecording(isRecording);}
+    public void setStepBeforeShutdownForActivity(int steps){if(steps == 1){repository.setStepCount(currentSteps);}else{repository.setStepCount(steps);}}
     public void startRecording(){
 
         stepSensorManager.startListening();
         stepSensorManager.getCurrentSensorTotalSteps().observeForever(totalSteps ->{
             if(!isInitialStepValueTaken){
-                initialStepValue = totalSteps;
                 isInitialStepValueTaken = true;
+                initialStepValue = totalSteps - stepBeforeShutdown;
             }
             currentSteps = totalSteps-initialStepValue;
             Log.d("Step Counter", "Sensor event received: " + initialStepValue);
@@ -55,6 +67,8 @@ public class MainViewModel extends AndroidViewModel{
         isInitialStepValueTaken = false;
         saveToDB();
         currentStepsForDisplay.setValue("");
+        setStepBeforeShutdownForActivity(0);
+        stepBeforeShutdown = 0;
     }
 
     public void saveToDB(){

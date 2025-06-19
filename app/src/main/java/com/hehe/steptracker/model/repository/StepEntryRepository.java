@@ -1,6 +1,7 @@
 package com.hehe.steptracker.model.repository;
 
 import android.app.Application;
+import android.util.Log;
 
 import com.hehe.steptracker.model.database.AppDatabase;
 import com.hehe.steptracker.model.database.StepEntryDao;
@@ -22,6 +23,9 @@ public class StepEntryRepository {
         allStepEntries = stepEntryDao.getAllStepEntry();
         Date currentTime = new Date();
         currentStepEntry = stepEntryDao.getStepEntryFromDate(currentTime);
+        sharedPreferencesManager = new SharedPreferencesManager(application);
+
+
 
     }
     //Room Database
@@ -43,6 +47,7 @@ public class StepEntryRepository {
     }
     public void setStepCount(int step) {
         sharedPreferencesManager.saveInt("step_count", step);
+        Log.d("Step Counter", "setStepCountRepo: " + step);
     }
 
     public void setIsRecording(boolean isRecording) {
@@ -50,7 +55,7 @@ public class StepEntryRepository {
     }
 
     public boolean getIsRecording() {
-        return sharedPreferencesManager.getBoolean("welcome_shown", false);
+        return sharedPreferencesManager.getBoolean("is_recording", false);
     }
 
 }
