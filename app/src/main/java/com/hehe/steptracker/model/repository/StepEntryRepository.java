@@ -20,7 +20,6 @@ public class StepEntryRepository {
     public StepEntryRepository(Application application){
         AppDatabase database = AppDatabase.getDatabase(application);
         stepEntryDao = database.stepEntryDao();
-        allStepEntries = stepEntryDao.getAllStepEntry();
         Date currentTime = new Date();
         currentStepEntry = stepEntryDao.getStepEntryFromDate(currentTime);
         sharedPreferencesManager = new SharedPreferencesManager(application);
@@ -30,7 +29,7 @@ public class StepEntryRepository {
     }
     //Room Database
     public List<StepEntry> getAllStepEntries(){
-        return allStepEntries;
+        return stepEntryDao.getAllStepEntry();
     }
     public StepEntry getStep(){
         return currentStepEntry;

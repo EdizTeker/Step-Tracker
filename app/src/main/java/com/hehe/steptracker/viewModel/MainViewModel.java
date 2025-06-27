@@ -12,6 +12,7 @@ import com.hehe.steptracker.model.entity.StepEntry;
 import com.hehe.steptracker.model.repository.StepEntryRepository;
 
 import java.util.Date;
+import java.util.List;
 
 public class MainViewModel extends AndroidViewModel{
 
@@ -44,6 +45,7 @@ public class MainViewModel extends AndroidViewModel{
         }
     }
 
+    public List<StepEntry> getAllStepsForActivity(){return repository.getAllStepEntries();}
     public LiveData<String> getStepForActivity(){return currentStepsForDisplay;}
     public boolean getIsRecordingForActivity(){return isRecording;}
     public void getStepBeforeShutdownForActivity(){currentSteps = stepBeforeShutdown;}

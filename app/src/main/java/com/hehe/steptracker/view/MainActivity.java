@@ -16,6 +16,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.hehe.steptracker.R;
 import com.hehe.steptracker.viewModel.MainViewModel;
@@ -25,6 +27,8 @@ public class MainActivity extends AppCompatActivity {
     private MainViewModel viewModel;
     private TextView stepTxt;
     private Button recordBtn;
+    private RecyclerView recyclerView;
+    private StepEntryAdapter adapter;
     private static final int PERMISSION_REQUEST_ACTIVITY_RECOGNITION = 100;
     private boolean isRecording;
 
@@ -38,20 +42,18 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
+        innitComponents();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             if (checkSelfPermission(android.Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{android.Manifest.permission.ACTIVITY_RECOGNITION}, PERMISSION_REQUEST_ACTIVITY_RECOGNITION);
             }
         }
-        stepTxt = findViewById(R.id.stepTxt);
-        recordBtn = findViewById(R.id.recordBtn);
 
-        viewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(MainViewModel.class);
         viewModel.getStepForActivity().observe(this, currentStepsForDisplay -> {
             stepTxt.setText(currentStepsForDisplay);
         });
 
+        updateRecyclerView();
         isRecording = viewModel.getIsRecordingForActivity();
         if(isRecording){
             viewModel.getStepBeforeShutdownForActivity();
@@ -71,7 +73,9 @@ public class MainActivity extends AppCompatActivity {
                 isRecording = false;
             }
             viewModel.setIsRecordingForModel(isRecording);
+            updateRecyclerView();
         });
+
     }
 
 
@@ -91,5 +95,17 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         viewModel.setIsRecordingForModel(isRecording);
        if(isRecording){viewModel.setStepBeforeShutdownForActivity(1);}
+    }
+
+    public void innitComponents(){
+        stepTxt = findViewById(R.id.stepTxt);
+        recordBtn = findViewById(R.id.recordBtn);
+        recyclerView = findViewById(R.id.stepRecyclerView);
+        viewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(MainViewModel.class);
+    }
+    private void updateRecyclerView(){
+        adapter = new StepEntryAdapter(viewModel.getAllStepsForActivity());
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
 }
