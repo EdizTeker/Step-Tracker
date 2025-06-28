@@ -25,6 +25,7 @@ public class MainViewModel extends AndroidViewModel{
     private boolean isInitialStepValueTaken = false;
     private boolean isRecording;
     private int stepBeforeShutdown;
+    private String stepEntryTitle;
 
 
     public MainViewModel(Application application) { //View model constructor
@@ -51,6 +52,7 @@ public class MainViewModel extends AndroidViewModel{
     public void getStepBeforeShutdownForActivity(){currentSteps = stepBeforeShutdown;}
     public void setIsRecordingForModel(boolean isRecording){repository.setIsRecording(isRecording);}
     public void setStepBeforeShutdownForActivity(int steps){if(steps == 1){repository.setStepCount(currentSteps);}else{repository.setStepCount(steps);}}
+
     public void startRecording(){
 
         stepSensorManager.startListening();
@@ -64,9 +66,10 @@ public class MainViewModel extends AndroidViewModel{
             currentStepsForDisplay.setValue(String.valueOf(currentSteps));
         });
     }
-    public void finishRecording() { //Records the step count
+    public void finishRecording(String title) { //Records the step count
         stepSensorManager.stopListening();
         isInitialStepValueTaken = false;
+        stepEntryTitle = title;
         saveToDB();
         currentStepsForDisplay.setValue("");
         setStepBeforeShutdownForActivity(0);
@@ -74,10 +77,11 @@ public class MainViewModel extends AndroidViewModel{
     }
 
     public void saveToDB(){
+        Log.d("Step Tracker", "title = " + stepEntryTitle);
         StepEntry stepEntry = new StepEntry();
         stepEntry.date = new Date();
         stepEntry.stepCount = currentSteps;
-        stepEntry.title = "deneme";
+        stepEntry.title= stepEntryTitle;
         repository.insert(stepEntry);
         Log.d("Step Counter", "Database action");
 
