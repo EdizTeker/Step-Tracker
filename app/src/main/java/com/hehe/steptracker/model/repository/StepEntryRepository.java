@@ -3,6 +3,8 @@ package com.hehe.steptracker.model.repository;
 import android.app.Application;
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
+
 import com.hehe.steptracker.model.database.AppDatabase;
 import com.hehe.steptracker.model.database.StepEntryDao;
 import com.hehe.steptracker.model.entity.StepEntry;
@@ -13,7 +15,7 @@ import java.util.List;
 
 public class StepEntryRepository {
     private StepEntryDao stepEntryDao;
-    private List<StepEntry> allStepEntries;
+    private LiveData<List<StepEntry>> allStepEntries;
     private StepEntry currentStepEntry;
     private SharedPreferencesManager sharedPreferencesManager;
 
@@ -23,12 +25,12 @@ public class StepEntryRepository {
         Date currentTime = new Date();
         currentStepEntry = stepEntryDao.getStepEntryFromDate(currentTime);
         sharedPreferencesManager = new SharedPreferencesManager(application);
-
+        allStepEntries = stepEntryDao.getAllStepEntry();
 
 
     }
     //Room Database
-    public List<StepEntry> getAllStepEntries(){
+    public LiveData<List<StepEntry>> getAllStepEntries(){
         return stepEntryDao.getAllStepEntry();
     }
     public StepEntry getStep(){

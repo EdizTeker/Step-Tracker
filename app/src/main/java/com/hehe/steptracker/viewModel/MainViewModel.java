@@ -46,7 +46,7 @@ public class MainViewModel extends AndroidViewModel{
         }
     }
 
-    public List<StepEntry> getAllStepsForActivity(){return repository.getAllStepEntries();}
+    public LiveData<List<StepEntry>> getAllStepsForActivity(){return repository.getAllStepEntries();}
     public LiveData<String> getStepForActivity(){return currentStepsForDisplay;}
     public boolean getIsRecordingForActivity(){return isRecording;}
     public void getStepBeforeShutdownForActivity(){currentSteps = stepBeforeShutdown;}

@@ -18,26 +18,32 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.button.MaterialButton;
 import com.hehe.steptracker.R;
+import com.hehe.steptracker.model.entity.StepEntry;
 import com.hehe.steptracker.viewModel.MainViewModel;
+
+import java.util.Collections;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private MainViewModel viewModel;
     private TextView stepTxt;
-    private Button recordBtn;
+    private MaterialButton recordBtn;
     private RecyclerView recyclerView;
     private StepEntryAdapter adapter;
     private static final int PERMISSION_REQUEST_ACTIVITY_RECOGNITION = 100;
     private boolean isRecording;
-    private String title;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,33 +55,36 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        permissionRequest();
+
         innitComponents();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            if (checkSelfPermission(android.Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{android.Manifest.permission.ACTIVITY_RECOGNITION}, PERMISSION_REQUEST_ACTIVITY_RECOGNITION);
-            }
-        }
+
+        setupRecyclerView();
 
         viewModel.getStepForActivity().observe(this, currentStepsForDisplay -> {
             stepTxt.setText(currentStepsForDisplay);
         });
 
-        updateRecyclerView();
         isRecording = viewModel.getIsRecordingForActivity();
         if(isRecording){
             viewModel.getStepBeforeShutdownForActivity();
             recordBtn.setText("Finish");
+            recordBtn.setIcon(ContextCompat.getDrawable(this,R.drawable.stop_button_vector));
         }else {
             recordBtn.setText("Record");
+            recordBtn.setIcon(ContextCompat.getDrawable(this,R.drawable.record_button_vector));
         }
 
         recordBtn.setOnClickListener(v -> {
             if(!isRecording){
                 recordBtn.setText("Finish");
+                recordBtn.setIcon(ContextCompat.getDrawable(this,R.drawable.stop_button_vector));
                 viewModel.startRecording();
                 isRecording = true;
             }else {
                 recordBtn.setText("Record");
+                recordBtn.setIcon(ContextCompat.getDrawable(this,R.drawable.record_button_vector));
                 showDialogAndSaveToDb();
                 isRecording = false;
             }
@@ -110,11 +119,27 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.stepRecyclerView);
         viewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(MainViewModel.class);
     }
-    private void updateRecyclerView(){
-        adapter = new StepEntryAdapter(viewModel.getAllStepsForActivity());
+    private void setupRecyclerView(){
+        adapter = new StepEntryAdapter(Collections.emptyList());
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        viewModel.getAllStepsForActivity().observe(this, new Observer<List<StepEntry>>() {
+            @Override
+            public void onChanged(List<StepEntry> stepEntries) {
+                adapter.setStepEntries(stepEntries);
+                adapter.notifyDataSetChanged();
+            }
+        });
     }
+    private void permissionRequest(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (checkSelfPermission(android.Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.ACTIVITY_RECOGNITION}, PERMISSION_REQUEST_ACTIVITY_RECOGNITION);
+            }
+        }
+    }
+
 
     public void showDialogAndSaveToDb() {
 
@@ -143,25 +168,28 @@ public class MainActivity extends AppCompatActivity {
         builder.setCancelable(false);
 
         builder.setPositiveButton("Yes", (DialogInterface.OnClickListener) (dialog, which) -> {
-            String inputText = input.getText().toString().trim();
+            String inputText;
+            if (input.getText().toString().trim().length() > 12) {inputText = input.getText().toString().trim().substring(0,12);}
+            else {inputText = input.getText().toString().trim();}
             if (inputText.isEmpty()) {
-                inputText = "Unnamed Journey"; // Başlık boşsa varsayılan bir değer atayın
+                inputText = "Unnamed"; // Başlık boşsa varsayılan bir değer atayın
                 Toast.makeText(MainActivity.this, "Exiting without a reason. Saved as 'Unnamed Journey'.", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(MainActivity.this, "Journey Title: " + inputText, Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "Successfully saved the journey. Journey Title: " + inputText, Toast.LENGTH_LONG).show();
             }
             // Başlığı doğrudan finishRecording metoduna gönderin
             viewModel.finishRecording(inputText);
-            updateRecyclerView();
         });
 
         builder.setNegativeButton("No", (DialogInterface.OnClickListener) (dialog, which) -> {
-
+            Toast.makeText(MainActivity.this, "Discarded the journey.", Toast.LENGTH_SHORT).show();
             dialog.cancel();
+
         });
 
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
 
     }
+
 }

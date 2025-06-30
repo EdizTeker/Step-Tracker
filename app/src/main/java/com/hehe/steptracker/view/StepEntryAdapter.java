@@ -22,13 +22,18 @@ public class StepEntryAdapter extends RecyclerView.Adapter<StepEntryAdapter.Step
     private List<StepEntry> stepEntries = new ArrayList<>();
 
     public StepEntryAdapter(List<StepEntry> stepEntries) {
-        Collections.reverse(stepEntries);
         this.stepEntries = stepEntries;
+        notifyDataSetChanged();
+    }
+
+    public void updateRV(List<StepEntry> stepEntries){
+        this.stepEntries = stepEntries;
+        notifyDataSetChanged();
     }
 
     public void setStepEntries(List<StepEntry> stepEntries) {
         this.stepEntries = stepEntries;
-        notifyDataSetChanged();
+
     }
 
     @NonNull
@@ -66,4 +71,5 @@ public class StepEntryAdapter extends RecyclerView.Adapter<StepEntryAdapter.Step
             listTitleTxt = itemView.findViewById(R.id.listTitleTxt);
         }
     }
+
 }
