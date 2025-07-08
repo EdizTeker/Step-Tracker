@@ -69,11 +69,13 @@ public class MainViewModel extends AndroidViewModel{
     public void finishRecording(String title) { //Records the step count
         stepSensorManager.stopListening();
         isInitialStepValueTaken = false;
-        stepEntryTitle = title;
-        saveToDB();
         currentStepsForDisplay.setValue("");
         setStepBeforeShutdownForActivity(0);
         stepBeforeShutdown = 0;
+        if(!title.equals("donttypethis")){
+            stepEntryTitle = title;
+            saveToDB();
+        }
     }
 
     public void saveToDB(){
@@ -85,6 +87,11 @@ public class MainViewModel extends AndroidViewModel{
         repository.insert(stepEntry);
         Log.d("Step Counter", "Database action");
 
+    }
+    public void deleteSteps(List<StepEntry> stepEntries){
+        if(!stepEntries.isEmpty()){
+            repository.delete(stepEntries);
+        }
     }
 
 }

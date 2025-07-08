@@ -41,6 +41,11 @@ public class StepEntryRepository {
             stepEntryDao.insertStepEntry(stepEntry);
         });
     }
+    public void delete(List<StepEntry> stepEntries){
+        AppDatabase.databaseWriteExecutor.execute(() -> {
+            stepEntryDao.deleteStepEntries(stepEntries);
+        });
+    }
 
     //Shared Preferences
     public Integer getStepCount() {

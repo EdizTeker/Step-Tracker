@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Step Tracker</string>
+    <string name="deleted">Deleted</string>
+    <string name="selected">Selected</string>
 </resources>

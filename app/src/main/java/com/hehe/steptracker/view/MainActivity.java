@@ -2,7 +2,9 @@ package com.hehe.steptracker.view;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
@@ -32,6 +34,7 @@ import com.hehe.steptracker.R;
 import com.hehe.steptracker.model.entity.StepEntry;
 import com.hehe.steptracker.viewModel.MainViewModel;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -120,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
         viewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(MainViewModel.class);
     }
     private void setupRecyclerView(){
-        adapter = new StepEntryAdapter(Collections.emptyList());
+        adapter = new StepEntryAdapter(this, this, Collections.emptyList());
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -140,6 +143,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void delete(List<StepEntry> stepEntries){
+        if (stepEntries != null && !stepEntries.isEmpty()) {
+            // Create a copy here before passing to ViewModel
+            List<StepEntry> copyForDeletion = new ArrayList<>(stepEntries);
+            viewModel.deleteSteps(copyForDeletion);
+            Log.d("step", "delete: " + copyForDeletion);
+        }
+    }
 
     public void showDialogAndSaveToDb() {
 
@@ -172,23 +183,46 @@ public class MainActivity extends AppCompatActivity {
             if (input.getText().toString().trim().length() > 12) {inputText = input.getText().toString().trim().substring(0,12);}
             else {inputText = input.getText().toString().trim();}
             if (inputText.isEmpty()) {
-                inputText = "Unnamed"; // Başlık boşsa varsayılan bir değer atayın
-                Toast.makeText(MainActivity.this, "Exiting without a reason. Saved as 'Unnamed Journey'.", Toast.LENGTH_SHORT).show();
+                inputText = "Unnamed";
+                Toast.makeText(MainActivity.this, "Exiting without a reason. Saved as 'Unnamed", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(MainActivity.this, "Successfully saved the journey. Journey Title: " + inputText, Toast.LENGTH_LONG).show();
             }
-            // Başlığı doğrudan finishRecording metoduna gönderin
             viewModel.finishRecording(inputText);
         });
 
+
         builder.setNegativeButton("No", (DialogInterface.OnClickListener) (dialog, which) -> {
             Toast.makeText(MainActivity.this, "Discarded the journey.", Toast.LENGTH_SHORT).show();
+            viewModel.finishRecording("donttypethis");
             dialog.cancel();
 
         });
 
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
+        final Button button = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        button.setEnabled(false);
+        input.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // my validation condition
+                if (input.getText().length() > 0) {
+                    button.setEnabled(true);
+                } else {
+                    button.setEnabled(false);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
     }
 

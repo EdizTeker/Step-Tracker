@@ -2,6 +2,7 @@ package com.hehe.steptracker.model.database;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
@@ -19,6 +20,8 @@ public interface StepEntryDao {
     StepEntry getStepEntryFromDate(Date date);
     @Insert
     void insertStepEntry(StepEntry stepEntry);
+    @Delete
+    void deleteStepEntries(List<StepEntry> stepEntries);
     @Update
     void updateStepEntry(StepEntry stepEntry);
 
